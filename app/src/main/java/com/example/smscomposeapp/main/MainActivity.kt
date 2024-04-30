@@ -1,4 +1,4 @@
-package com.example.smscomposeapp
+package com.example.smscomposeapp.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
