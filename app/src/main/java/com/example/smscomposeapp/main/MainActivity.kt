@@ -63,7 +63,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
                 ) {
                     //SmsPermission()
                     //SmsScreen()
-                    SmsUserChatScreen()
+                    SmsUserChatScreen(viewModel)
                 }
             }
         }
@@ -123,7 +123,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
 
 
     private fun receiveSmsUi(number: TextFieldValue, text: TextFieldValue) {
-        viewModel.receivedMessage.observe(this@MainActivity) { (phoneNumber, message) ->
+        viewModel.receivedMessage.observe(this@MainActivity) { (_, _) ->
         val phoneNumber = number.text
         val message = text.text
         val smsModel = SmsModel(phoneNumber = phoneNumber, message = message)

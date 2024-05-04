@@ -6,61 +6,108 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smscomposeapp.data.models.SmsModel
+import com.example.smscomposeapp.infrastructure.SmsViewModel
 
 @Composable
-fun SmsUserChatScreen() {
+fun SmsUserChatScreen(viwModel: SmsViewModel) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            // شماره تلفن
-            Text(text = "شماره تلفن",
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = TextStyle(fontSize = 18.sp)
-            )
+    var message by remember { mutableStateOf("") }
 
-            // لیست چت
-            ChatList(
-                chats = listOf(
-                    //ChatMessage(sender = "من", message = "سلام!"),
-                    //ChatMessage(sender = "شما", message = "سلام! خوبین؟")
+
+    Scaffold(
+        content = { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                OutlinedTextField(
+                    value = message,
+                    onValueChange = { message = it },
+                    label = { Text(text = "phone number") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 )
-            )
-
-            // ورودی متن پیام
-            OutlinedTextField(
-                value = "", // مقدار متنی که کاربر وارد می‌کند
-                onValueChange = {}, // تابعی که هنگام تغییر مقدار فراخوانی می‌شود
-                label = { Text(text = "پیام خود را وارد کنید...") }, // برچسب ورودی
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-
-    @Composable
-    fun ChatList(chats: List<SmsModel>) {
-        LazyColumn {
-            items(chats) { chat ->
-                ChatMessageItem(chat = chat)
+                ChatList(
+                    chats = listOf(
+                        SmsModel(phoneNumber = "من", message = "سلام!"),
+                        SmsModel(phoneNumber = "شما", message = "سلام! خوبین؟")
+                    ).reversed()
+                )
+            }
+        },
+        bottomBar = {
+            BottomAppBar() {
+                OutlinedTextField(
+                    value = message,
+                    onValueChange = { message = it },
+                    label = { Text(text = "message") },
+                    textStyle = if (message.isNotEmpty()) {
+                        TextStyle(textAlign = if (message.isRTL()) TextAlign.End else TextAlign.Start)
+                    } else {
+                        TextStyle(textAlign = TextAlign.Start)
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 8.dp)
+                )
+                IconButton(onClick = { /* ارسال پیام */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "ارسال"
+                    )
+                }
             }
         }
-    }
+    )
 
-    @Composable
-    fun ChatMessageItem(chat: SmsModel) {
-        Text(
-            text = "${chat.phoneNumber}: ${chat.message}",
-            style = TextStyle(fontSize = 16.sp)
-        )
+}
+
+private fun String.isRTL(): Boolean {
+    return Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
+            Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC
+}
+
+
+@Composable
+fun ChatList(chats: List<SmsModel>) {
+    LazyColumn {
+        items(chats) { chat ->
+            ChatMessageItem(chat = chat)
+        }
     }
+}
+
+@Composable
+fun ChatMessageItem(chat: SmsModel) {
+    val textAlign = if (chat.phoneNumber == "من") TextAlign.End else TextAlign.Start
+    Text(
+        text = "${chat.phoneNumber}: ${chat.message}",
+        style = TextStyle(fontSize = 16.sp),
+        textAlign = textAlign,
+        modifier = Modifier.fillMaxWidth()
+            .padding(16.dp)
+    )
+}
 
