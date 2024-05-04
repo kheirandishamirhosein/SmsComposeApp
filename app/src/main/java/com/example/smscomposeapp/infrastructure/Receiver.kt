@@ -19,7 +19,7 @@ object Receiver {
                 for (sms in messages) {
                     val sender = sms.originatingAddress ?: ""
                     val message = sms.displayMessageBody ?: ""
-                    val smsModel = SmsModel(sender, message)
+                    val smsModel = SmsModel(phoneNumber = sender, message = message)
                     callback.receiveSms(smsModel)
                 }
             }

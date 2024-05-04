@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
@@ -35,14 +34,14 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.doman.SmsReceiver
-import com.example.smscomposeapp.infrastructure.MainViewModel
+import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.infrastructure.Receiver
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
 import com.example.smscomposeapp.util.SmsPermission
 import com.example.smscomposeapp.util.SmsPermissionCode
 
 
-private lateinit var viewModel: MainViewModel
+private lateinit var viewModel: SmsViewModel
 
 class MainActivity : FragmentActivity(), SmsReceiver {
 
@@ -52,7 +51,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permission = SmsPermission(this)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        viewModel = ViewModelProvider(this)[SmsViewModel::class.java]
         setContent {
             SmsComposeAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -111,14 +110,21 @@ class MainActivity : FragmentActivity(), SmsReceiver {
     private fun sendSms(number: TextFieldValue, text: TextFieldValue) {
         val phoneNumber = number.text
         val message = text.text
-        val smsModel = SmsModel(phoneNumber, message)
+        val smsModel = SmsModel(phoneNumber = phoneNumber, message = message)
         viewModel.sendSms(smsModel)
     }
 
     override fun receiveSms(smsModel: SmsModel) {
-        runOnUiThread {
-            viewModel.receiveSms(smsModel)
-            // viewModel.receivedMessage.observe(this@MainActivity)
+
+    }
+
+
+    private fun receiveSmsUi(number: TextFieldValue, text: TextFieldValue) {
+        viewModel.receivedMessage.observe(this@MainActivity) { (phoneNumber, message) ->
+        val phoneNumber = number.text
+        val message = text.text
+        val smsModel = SmsModel(phoneNumber = phoneNumber, message = message)
+        viewModel.receiveSms(smsModel)
         }
     }
 
@@ -148,7 +154,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
         var text by remember { mutableStateOf(TextFieldValue()) }
 
         sendMessageIfPermissionsGranted(context, this@MainActivity)
-
+        receiveSmsUi(number, text)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,7 +171,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
             OutlinedTextFieldComponent(
                 value = text,
                 onValueChange = { text = it },
-                label = "Age",
+                label = "Message",
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
 
                 )
