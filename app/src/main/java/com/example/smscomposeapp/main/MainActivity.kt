@@ -33,25 +33,27 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.smscomposeapp.data.models.SmsModel
+import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.doman.SmsReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.infrastructure.Receiver
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
+import com.example.smscomposeapp.ui.user_chat_screen.SmsUserChatScreen
 import com.example.smscomposeapp.util.SmsPermission
 import com.example.smscomposeapp.util.SmsPermissionCode
 
 
-private lateinit var viewModel: SmsViewModel
 
 class MainActivity : FragmentActivity(), SmsReceiver {
 
     private lateinit var permission: SmsPermission
+    private lateinit var viewModel: SmsViewModel
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permission = SmsPermission(this)
-        viewModel = ViewModelProvider(this)[SmsViewModel::class.java]
+        viewModel = SmsContainer.getSmsViewModel()
         setContent {
             SmsComposeAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -60,7 +62,8 @@ class MainActivity : FragmentActivity(), SmsReceiver {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     //SmsPermission()
-                    SmsScreen()
+                    //SmsScreen()
+                    SmsUserChatScreen()
                 }
             }
         }
