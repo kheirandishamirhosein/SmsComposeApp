@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.BottomAppBar
@@ -22,7 +23,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,13 +49,19 @@ fun SmsUserChatScreen(viewModel: SmsViewModel) {
             ) {
                 OutlinedTextField(
                     value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
+                    onValueChange = { value ->
+                        if (value.length <= 11) {
+                            phoneNumber = value
+                        }
+                    },
                     label = { Text(text = "phone number") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
+                    visualTransformation = VisualTransformation.None,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
                 )
-                Log.d("khkhkh phone number" , phoneNumber)
+                Log.d("khkhkh phone number", phoneNumber)
                 ChatList(smsModelsState = smsModelsState)
             }
         },
@@ -71,7 +81,7 @@ fun SmsUserChatScreen(viewModel: SmsViewModel) {
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 8.dp)
                 )
-                Log.d("khkhkh message" , message)
+                Log.d("khkhkh message", message)
                 IconButton(
                     onClick = {
                         viewModel.sendSms(
@@ -82,7 +92,7 @@ fun SmsUserChatScreen(viewModel: SmsViewModel) {
                         )
                         viewModel.receiveSms(SmsModel(phoneNumber = "من", message = message))
                         message = ""
-                        smsModelsState.value = viewModel.smsModels.reversed()
+                        smsModelsState.value = viewModel.smsModels
                     }
                 ) {
                     Icon(
@@ -90,7 +100,7 @@ fun SmsUserChatScreen(viewModel: SmsViewModel) {
                         contentDescription = "ارسال"
                     )
                 }
-                Log.d("khkhkh send sms" , "phoneNumber: $phoneNumber , message: $message" )
+                Log.d("khkhkh send sms", "phoneNumber: $phoneNumber , message: $message")
             }
         }
     )
@@ -115,9 +125,10 @@ fun ChatList(smsModelsState: MutableState<List<SmsModel>>) {
 @Composable
 fun ChatMessageItem(chat: SmsModel) {
     val textAlign = if (chat.phoneNumber == "من") TextAlign.End else TextAlign.Start
+    val color = if (chat.phoneNumber == "من") Color.Green else Color.Blue
     Text(
         text = chat.message,
-        style = TextStyle(fontSize = 16.sp),
+        style = TextStyle(fontSize = 16.sp, color = color),
         textAlign = textAlign,
         modifier = Modifier
             .fillMaxWidth()
