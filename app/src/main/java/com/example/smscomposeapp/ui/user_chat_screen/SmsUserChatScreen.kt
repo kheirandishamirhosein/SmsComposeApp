@@ -1,5 +1,6 @@
 package com.example.smscomposeapp.ui.user_chat_screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,10 +30,11 @@ import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 
 @Composable
-fun SmsUserChatScreen(viwModel: SmsViewModel) {
+fun SmsUserChatScreen(viewModel: SmsViewModel) {
 
+    var phoneNumber by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
-
+    val smsModelsState = remember { mutableStateOf(emptyList<SmsModel>()) }
 
     Scaffold(
         content = { padding ->
@@ -41,19 +44,15 @@ fun SmsUserChatScreen(viwModel: SmsViewModel) {
                     .padding(padding)
             ) {
                 OutlinedTextField(
-                    value = message,
-                    onValueChange = { message = it },
+                    value = phoneNumber,
+                    onValueChange = { phoneNumber = it },
                     label = { Text(text = "phone number") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
                 )
-                ChatList(
-                    chats = listOf(
-                        SmsModel(phoneNumber = "من", message = "سلام!"),
-                        SmsModel(phoneNumber = "شما", message = "سلام! خوبین؟")
-                    ).reversed()
-                )
+                Log.d("khkhkh phone number" , phoneNumber)
+                ChatList(smsModelsState = smsModelsState)
             }
         },
         bottomBar = {
@@ -72,12 +71,26 @@ fun SmsUserChatScreen(viwModel: SmsViewModel) {
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 8.dp)
                 )
-                IconButton(onClick = { /* ارسال پیام */ }) {
+                Log.d("khkhkh message" , message)
+                IconButton(
+                    onClick = {
+                        viewModel.sendSms(
+                            SmsModel(
+                                phoneNumber = phoneNumber,
+                                message = message
+                            )
+                        )
+                        viewModel.receiveSms(SmsModel(phoneNumber = "من", message = message))
+                        message = ""
+                        smsModelsState.value = viewModel.smsModels.reversed()
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Default.Send,
                         contentDescription = "ارسال"
                     )
                 }
+                Log.d("khkhkh send sms" , "phoneNumber: $phoneNumber , message: $message" )
             }
         }
     )
@@ -91,9 +104,9 @@ private fun String.isRTL(): Boolean {
 
 
 @Composable
-fun ChatList(chats: List<SmsModel>) {
+fun ChatList(smsModelsState: MutableState<List<SmsModel>>) {
     LazyColumn {
-        items(chats) { chat ->
+        items(smsModelsState.value) { chat ->
             ChatMessageItem(chat = chat)
         }
     }
@@ -103,11 +116,13 @@ fun ChatList(chats: List<SmsModel>) {
 fun ChatMessageItem(chat: SmsModel) {
     val textAlign = if (chat.phoneNumber == "من") TextAlign.End else TextAlign.Start
     Text(
-        text = "${chat.phoneNumber}: ${chat.message}",
+        text = chat.message,
         style = TextStyle(fontSize = 16.sp),
         textAlign = textAlign,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp)
     )
+
 }
 

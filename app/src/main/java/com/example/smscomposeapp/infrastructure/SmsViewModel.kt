@@ -8,14 +8,18 @@ import com.example.smscomposeapp.data.dao.SmsUserDao
 import com.example.smscomposeapp.data.imp.ImpSmsSendRepository
 import com.example.smscomposeapp.data.models.SmsModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class SmsViewModel(private val smsUserDao: SmsUserDao) : ViewModel() {
     private val smsSender = ImpSmsSendRepository()
+    private val smsList = mutableListOf<SmsModel>()
 
-    private val _receivedMessage = MutableLiveData<Pair<String?, String>>()
-    val receivedMessage: LiveData<Pair<String?, String>> = _receivedMessage
-
+    private val _receivedMessage = MutableStateFlow<Pair<String?, String>>(Pair(null, ""))
+    val receivedMessage: StateFlow<Pair<String?, String>> = _receivedMessage
+    val smsModels: List<SmsModel>
+        get() = smsList.toList()
 
     //Room DB
     /*
@@ -32,10 +36,12 @@ class SmsViewModel(private val smsUserDao: SmsUserDao) : ViewModel() {
     */
 
     fun sendSms(smsModel: SmsModel) {
+        smsList.add(smsModel)
         smsSender.sendSms(smsModel)
     }
 
     fun receiveSms(smsModel: SmsModel) {
+        smsList.add(smsModel)
         _receivedMessage.value = Pair(smsModel.phoneNumber, smsModel.message)
     }
 }

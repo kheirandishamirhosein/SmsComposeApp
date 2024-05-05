@@ -44,7 +44,7 @@ import com.example.smscomposeapp.util.SmsPermissionCode
 
 
 
-class MainActivity : FragmentActivity(), SmsReceiver {
+class MainActivity : FragmentActivity() {
 
     private lateinit var permission: SmsPermission
     private lateinit var viewModel: SmsViewModel
@@ -61,6 +61,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    sendMessageIfPermissionsGranted(this,this)
                     //SmsPermission()
                     //SmsScreen()
                     SmsUserChatScreen(viewModel)
@@ -89,7 +90,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
 
             SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Receiver.receiveMessage(this, this)
+                    //Receiver.receiveMessage(this, this)
                 } else {
                     permission.requestReceiveSmsPermission(SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE)
                 }
@@ -105,7 +106,7 @@ class MainActivity : FragmentActivity(), SmsReceiver {
             if (!permission.isSendSmsPermissionGranted()) {
                 permission.requestSendSmsPermission(SmsPermissionCode.SEND_SMS_PERMISSION_CODE)
             }
-            Receiver.receiveMessage(context, mainActivity)
+           // Receiver.receiveMessage(context, mainActivity)
 
         }
     }
@@ -117,11 +118,9 @@ class MainActivity : FragmentActivity(), SmsReceiver {
         viewModel.sendSms(smsModel)
     }
 
-    override fun receiveSms(smsModel: SmsModel) {
-
-    }
 
 
+    /*
     private fun receiveSmsUi(number: TextFieldValue, text: TextFieldValue) {
         viewModel.receivedMessage.observe(this@MainActivity) { (_, _) ->
         val phoneNumber = number.text
@@ -130,8 +129,10 @@ class MainActivity : FragmentActivity(), SmsReceiver {
         viewModel.receiveSms(smsModel)
         }
     }
+    */
 
 
+    /*
     @Composable
     fun OutlinedTextFieldComponent(
         value: TextFieldValue,
@@ -148,7 +149,9 @@ class MainActivity : FragmentActivity(), SmsReceiver {
             modifier = modifier.fillMaxWidth()
         )
     }
+    */
 
+    /*
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
     fun SmsScreen() {
@@ -190,8 +193,11 @@ class MainActivity : FragmentActivity(), SmsReceiver {
         }
     }
 
+    */
+
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
@@ -199,3 +205,5 @@ fun GreetingPreview() {
         //SmsScreen()
     }
 }
+
+ */
