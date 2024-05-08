@@ -1,6 +1,12 @@
 package com.example.smscomposeapp.ui.user_chat_screen
 
+import android.os.Build
+import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,123 +23,193 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.smscomposeapp.data.models.MessageType
 import com.example.smscomposeapp.data.models.SmsModel
+import com.example.smscomposeapp.di.SmsContainer
+import com.example.smscomposeapp.doman.SmsReceiver
+import com.example.smscomposeapp.infrastructure.Receiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-@Composable
-fun SmsUserChatScreen(viewModel: SmsViewModel) {
 
-    var phoneNumber by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
-    val smsModelsState = remember { mutableStateOf(emptyList<SmsModel>()) }
+class SmsUserChatScreenFragment : Fragment() {
 
-    Scaffold(
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                OutlinedTextField(
-                    value = phoneNumber,
-                    onValueChange = { value ->
-                        if (value.length <= 11) {
-                            phoneNumber = value
-                        }
-                    },
-                    label = { Text(text = "phone number") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
-                    visualTransformation = VisualTransformation.None,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
+    private lateinit var viewModel: SmsViewModel
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = ComposeView(requireContext())
+        viewModel = SmsContainer.getSmsViewModel()
+        view.setContent {
+            SmsUserChatScreen(viewModel = viewModel)
+
+
+        Receiver.receiveMessage(requireContext(), object : SmsReceiver {
+            override fun receiveSms(smsModel: SmsModel) {
+                viewModel.receiveSms(smsModel)
+                Log.d(
+                    "khkhkh receive sms",
+                    "phoneNumber: ${smsModel.phoneNumber} , message: ${smsModel.message}"
                 )
-                Log.d("khkhkh phone number", phoneNumber)
-                ChatList(smsModelsState = smsModelsState)
             }
-        },
-        bottomBar = {
-            BottomAppBar() {
-                OutlinedTextField(
-                    value = message,
-                    onValueChange = { message = it },
-                    label = { Text(text = "message") },
-                    textStyle = if (message.isNotEmpty()) {
-                        TextStyle(textAlign = if (message.isRTL()) TextAlign.End else TextAlign.Start)
-                    } else {
-                        TextStyle(textAlign = TextAlign.Start)
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 8.dp)
-                )
-                Log.d("khkhkh message", message)
-                IconButton(
-                    onClick = {
-                        viewModel.sendSms(
-                            SmsModel(
-                                phoneNumber = phoneNumber,
-                                message = message
-                            )
-                        )
-                        viewModel.receiveSms(SmsModel(phoneNumber = "من", message = message))
-                        message = ""
-                        smsModelsState.value = viewModel.smsModels
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "ارسال"
-                    )
-                }
-                Log.d("khkhkh send sms", "phoneNumber: $phoneNumber , message: $message")
-            }
+        })
+
         }
-    )
+        return view
+    }
 
-}
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @Composable
+    fun SmsUserChatScreen(viewModel: SmsViewModel) {
+        val context = LocalContext.current
+        var phoneNumber by remember { mutableStateOf("") }
+        var message by remember { mutableStateOf("") }
+        val smsModelsState = remember { mutableStateOf(emptyList<SmsModel>()) }
+        val smsReceiver by viewModel.receivedMessages.collectAsState()
 
-private fun String.isRTL(): Boolean {
-    return Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
-            Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC
-}
+        Scaffold(
+            content = { padding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    OutlinedTextField(
+                        value = phoneNumber,
+                        onValueChange = { value ->
+                            if (value.length <= 11) {
+                                phoneNumber = value
+                            }
+                        },
+                        label = { Text(text = "phone number") },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
+                        visualTransformation = VisualTransformation.None,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                    ChatListReceive(smsModels = smsReceiver)
+                    ChatList(smsModelsState = smsModelsState)
+                }
+            },
+            bottomBar = {
+                BottomAppBar() {
+                    OutlinedTextField(
+                        value = message,
+                        onValueChange = { message = it },
+                        label = { Text(text = "message") },
+                        textStyle = if (message.isNotEmpty()) {
+                            TextStyle(textAlign = if (message.isRTL()) TextAlign.End else TextAlign.Start)
+                        } else {
+                            TextStyle(textAlign = TextAlign.Start)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp)
+                    )
+                    IconButton(
+                        onClick = {
+                            viewModel.sendSms(
+                                SmsModel(
+                                    phoneNumber = phoneNumber,
+                                    message = message,
+                                    messageType = MessageType.SENT
+                                )
+                            )
+                            //viewModel.receiveSms(SmsModel(phoneNumber = "من", message = message))
+                            message = ""
+                            smsModelsState.value = viewModel.smsModels
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "ارسال"
+                        )
+                    }
+                    Log.d("khkhkh send sms", "phoneNumber: $phoneNumber , message: $message")
+                }
+            }
+        )
+
+    }
+
+    private fun String.isRTL(): Boolean {
+        return Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
+                Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC
+    }
 
 
-@Composable
-fun ChatList(smsModelsState: MutableState<List<SmsModel>>) {
-    LazyColumn {
-        items(smsModelsState.value) { chat ->
-            ChatMessageItem(chat = chat)
+    @Composable
+    fun ChatList(smsModelsState: MutableState<List<SmsModel>>) {
+        LazyColumn {
+            items(smsModelsState.value) { chat ->
+                ChatMessageItem(chat = chat)
+            }
         }
     }
-}
 
-@Composable
-fun ChatMessageItem(chat: SmsModel) {
-    val textAlign = if (chat.phoneNumber == "من") TextAlign.End else TextAlign.Start
-    val color = if (chat.phoneNumber == "من") Color.Green else Color.Blue
-    Text(
-        text = chat.message,
-        style = TextStyle(fontSize = 16.sp, color = color),
-        textAlign = textAlign,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    )
+    @Composable
+    fun ChatMessageItem(chat: SmsModel) {
+        val textAlign = if (chat.messageType == MessageType.SENT) TextAlign.End else TextAlign.Start
+        Text(
+            text = chat.message,
+            style = TextStyle(fontSize = 16.sp),
+            textAlign = textAlign,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+    }
+
+    @Composable
+    fun ChatListReceive(smsModels: List<SmsModel>) {
+        LazyColumn {
+            items(smsModels) { chat ->
+                ChatMessageItemReceive(chat = chat)
+            }
+        }
+    }
+
+    @Composable
+    fun ChatMessageItemReceive(chat: SmsModel) {
+        val textAlign = if (chat.messageType == MessageType.SENT) TextAlign.End else TextAlign.Start
+        Text(
+            text = chat.message,
+            style = TextStyle(fontSize = 16.sp),
+            textAlign = textAlign,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+    }
+
+
 
 }
 

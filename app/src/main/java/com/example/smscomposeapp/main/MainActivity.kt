@@ -1,59 +1,52 @@
 package com.example.smscomposeapp.main
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.telephony.TelephonyManager
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.doman.SmsReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.infrastructure.Receiver
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
-import com.example.smscomposeapp.ui.user_chat_screen.SmsUserChatScreen
+import com.example.smscomposeapp.ui.user_chat_screen.SmsUserChatScreenFragment
+import com.example.smscomposeapp.util.AppSharePerf
 import com.example.smscomposeapp.util.SmsPermission
 import com.example.smscomposeapp.util.SmsPermissionCode
-
+import com.example.smscomposeapp.util.SmsPermissionCode.REQUEST_READ_PHONE_STATE
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 class MainActivity : FragmentActivity() {
 
     private lateinit var permission: SmsPermission
     private lateinit var viewModel: SmsViewModel
+    private lateinit var sharePref: AppSharePerf
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permission = SmsPermission(this)
         viewModel = SmsContainer.getSmsViewModel()
+        sharePref = AppSharePerf(this)
+
         setContent {
             SmsComposeAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -61,10 +54,15 @@ class MainActivity : FragmentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    sendMessageIfPermissionsGranted(this,this)
+                    sendMessageIfPermissionsGranted(this)
                     //SmsPermission()
                     //SmsScreen()
-                    SmsUserChatScreen(viewModel)
+                    //SmsUserChatScreen(viewModel)
+                    val fragment = SmsUserChatScreenFragment()
+                    supportFragmentManager.beginTransaction()
+                        .replace(android.R.id.content, fragment)
+                        .commit()
+
                 }
             }
         }
@@ -82,7 +80,7 @@ class MainActivity : FragmentActivity() {
         when (requestCode) {
             SmsPermissionCode.SEND_SMS_PERMISSION_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                   //TODO: send sms
+                    //TODO: send sms
                 } else {
                     permission.requestSendSmsPermission(SmsPermissionCode.SEND_SMS_PERMISSION_CODE)
                 }
@@ -95,29 +93,31 @@ class MainActivity : FragmentActivity() {
                     permission.requestReceiveSmsPermission(SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE)
                 }
             }
+
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun sendMessageIfPermissionsGranted(context: Context, mainActivity: MainActivity) {
+    private fun sendMessageIfPermissionsGranted(mainActivity: MainActivity) {
         if (!permission.isReceiveSmsPermissionGranted()) {
             permission.requestReceiveSmsPermission(SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE)
         } else {
             if (!permission.isSendSmsPermissionGranted()) {
                 permission.requestSendSmsPermission(SmsPermissionCode.SEND_SMS_PERMISSION_CODE)
             }
-           // Receiver.receiveMessage(context, mainActivity)
-
         }
     }
 
+
+
+    /*
     private fun sendSms(number: TextFieldValue, text: TextFieldValue) {
         val phoneNumber = number.text
         val message = text.text
         val smsModel = SmsModel(phoneNumber = phoneNumber, message = message)
         viewModel.sendSms(smsModel)
     }
-
+     */
 
 
     /*

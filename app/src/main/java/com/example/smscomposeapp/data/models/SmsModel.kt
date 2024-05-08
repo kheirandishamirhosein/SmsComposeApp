@@ -8,5 +8,6 @@ data class SmsModel(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val phoneNumber: String,
-    val message: String
+    val message: String,
+    val messageType: MessageType
 )

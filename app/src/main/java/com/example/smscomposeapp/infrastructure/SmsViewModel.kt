@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smscomposeapp.data.dao.SmsUserDao
 import com.example.smscomposeapp.data.imp.ImpSmsSendRepository
+import com.example.smscomposeapp.data.models.MessageType
 import com.example.smscomposeapp.data.models.SmsModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +17,11 @@ class SmsViewModel(private val smsUserDao: SmsUserDao) : ViewModel() {
     private val smsSender = ImpSmsSendRepository()
     private val smsList = mutableListOf<SmsModel>()
 
-    private val _receivedMessage = MutableStateFlow<Pair<String?, String>>(Pair(null, ""))
-    val receivedMessage: StateFlow<Pair<String?, String>> = _receivedMessage
+    //private val _receivedMessage = MutableStateFlow<Pair<String?, String>>(Pair(null, ""))
+    //val receivedMessage: StateFlow<Pair<String?, String>> = _receivedMessage
+    private val _receivedMessages = MutableStateFlow<List<SmsModel>>(emptyList())
+    val receivedMessages: StateFlow<List<SmsModel>> = _receivedMessages
+
     val smsModels: List<SmsModel>
         get() = smsList.toList()
 
@@ -40,8 +44,9 @@ class SmsViewModel(private val smsUserDao: SmsUserDao) : ViewModel() {
         smsSender.sendSms(smsModel)
     }
 
-    fun receiveSms(smsModel: SmsModel) {
+    fun receiveSms(smsModel: SmsModel ) {
         smsList.add(smsModel)
-        _receivedMessage.value = Pair(smsModel.phoneNumber, smsModel.message)
+        //_receivedMessage.value = Pair(smsModel.phoneNumber, smsModel.message)
+        _receivedMessages.value = smsList.toList()
     }
 }

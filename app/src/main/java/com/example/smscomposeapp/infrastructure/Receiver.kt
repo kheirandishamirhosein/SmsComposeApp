@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.provider.Telephony
 import androidx.annotation.RequiresApi
+import com.example.smscomposeapp.data.models.MessageType
 import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.doman.SmsReceiver
 
@@ -19,7 +20,7 @@ object Receiver {
                 for (sms in messages) {
                     val sender = sms.originatingAddress ?: ""
                     val message = sms.displayMessageBody ?: ""
-                    val smsModel = SmsModel(phoneNumber = sender, message = message)
+                    val smsModel = SmsModel(phoneNumber = sender, message = message , messageType = MessageType.RECEIVED)
                     callback.receiveSms(smsModel)
                 }
             }
