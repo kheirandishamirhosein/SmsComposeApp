@@ -23,7 +23,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -41,19 +39,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.example.smscomposeapp.data.models.MessageType
 import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.doman.SmsReceiver
-import com.example.smscomposeapp.infrastructure.Receiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 
-class SmsUserChatScreenFragment : Fragment() {
+class SmsUserChatScreenFragment : Fragment(), SmsReceiver {
 
     private lateinit var viewModel: SmsViewModel
 
@@ -66,18 +59,6 @@ class SmsUserChatScreenFragment : Fragment() {
         viewModel = SmsContainer.getSmsViewModel()
         view.setContent {
             SmsUserChatScreen(viewModel = viewModel)
-
-
-        Receiver.receiveMessage(requireContext(), object : SmsReceiver {
-            override fun receiveSms(smsModel: SmsModel) {
-                viewModel.receiveSms(smsModel)
-                Log.d(
-                    "khkhkh receive sms",
-                    "phoneNumber: ${smsModel.phoneNumber} , message: ${smsModel.message}"
-                )
-            }
-        })
-
         }
         return view
     }
@@ -112,7 +93,9 @@ class SmsUserChatScreenFragment : Fragment() {
                             .fillMaxWidth()
                             .padding(8.dp)
                     )
-                    ChatListReceive(smsModels = smsReceiver)
+                    //TODO: show receive text
+                    Text(text = "")
+
                     ChatList(smsModelsState = smsModelsState)
                 }
             },
@@ -187,28 +170,9 @@ class SmsUserChatScreenFragment : Fragment() {
 
     }
 
-    @Composable
-    fun ChatListReceive(smsModels: List<SmsModel>) {
-        LazyColumn {
-            items(smsModels) { chat ->
-                ChatMessageItemReceive(chat = chat)
-            }
-        }
+    override fun receiveSms(smsModel: SmsModel) {
+        TODO("Not yet implemented")
     }
-
-    @Composable
-    fun ChatMessageItemReceive(chat: SmsModel) {
-        val textAlign = if (chat.messageType == MessageType.SENT) TextAlign.End else TextAlign.Start
-        Text(
-            text = chat.message,
-            style = TextStyle(fontSize = 16.sp),
-            textAlign = textAlign,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-    }
-
 
 
 }

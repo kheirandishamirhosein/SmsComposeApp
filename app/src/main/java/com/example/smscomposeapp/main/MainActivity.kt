@@ -1,37 +1,26 @@
 package com.example.smscomposeapp.main
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.telephony.TelephonyManager
+import android.provider.Telephony
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.doman.SmsReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
-import com.example.smscomposeapp.infrastructure.Receiver
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
 import com.example.smscomposeapp.ui.user_chat_screen.SmsUserChatScreenFragment
 import com.example.smscomposeapp.util.AppSharePerf
 import com.example.smscomposeapp.util.SmsPermission
 import com.example.smscomposeapp.util.SmsPermissionCode
-import com.example.smscomposeapp.util.SmsPermissionCode.REQUEST_READ_PHONE_STATE
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 
 class MainActivity : FragmentActivity() {
@@ -39,6 +28,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var permission: SmsPermission
     private lateinit var viewModel: SmsViewModel
     private lateinit var sharePref: AppSharePerf
+    private lateinit var smsReceiver: SmsReceiver
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +36,12 @@ class MainActivity : FragmentActivity() {
         permission = SmsPermission(this)
         viewModel = SmsContainer.getSmsViewModel()
         sharePref = AppSharePerf(this)
-
+        smsReceiver = com.example.smscomposeapp.infrastructure.SmsReceiver()
+        // Register the SmsReceiver
+        registerReceiver(
+            smsReceiver as com.example.smscomposeapp.infrastructure.SmsReceiver,
+            IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
+        )
         setContent {
             SmsComposeAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -68,6 +63,12 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // Unregister the SmsReceiver to avoid memory leaks
+        unregisterReceiver(smsReceiver as com.example.smscomposeapp.infrastructure.SmsReceiver)
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)} passing\n      in a {@link RequestMultiplePermissions} object for the {@link ActivityResultContract} and\n      handling the result in the {@link ActivityResultCallback#onActivityResult(Object) callback}.")
@@ -81,6 +82,7 @@ class MainActivity : FragmentActivity() {
             SmsPermissionCode.SEND_SMS_PERMISSION_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //TODO: send sms
+                    Log.e("khkhkh", "send sms: ${permission.isSendSmsPermissionGranted()}")
                 } else {
                     permission.requestSendSmsPermission(SmsPermissionCode.SEND_SMS_PERMISSION_CODE)
                 }
@@ -88,7 +90,9 @@ class MainActivity : FragmentActivity() {
 
             SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //Receiver.receiveMessage(this, this)
+                    //TODO: receive SMS
+
+                    Log.e("khkhkh", "receive sms: ${permission.isReceiveSmsPermissionGranted()}")
                 } else {
                     permission.requestReceiveSmsPermission(SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE)
                 }
@@ -107,7 +111,6 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-
 
 
     /*
