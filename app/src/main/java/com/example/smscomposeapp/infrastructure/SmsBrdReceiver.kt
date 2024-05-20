@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
-import android.util.Log
 import com.example.smscomposeapp.data.models.MessageType
 import com.example.smscomposeapp.data.models.SmsModel
-import com.example.smscomposeapp.doman.SmsReceiver
 
-class SmsReceiver : BroadcastReceiver(), SmsReceiver {
+class SmsBrdReceiver(private val viewModel: SmsViewModel) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
             val bundle = intent.extras
@@ -27,16 +25,19 @@ class SmsReceiver : BroadcastReceiver(), SmsReceiver {
                             messageType = MessageType.RECEIVED
                         )
                     }
-                smsModel?.let { receiveSms(it) }
+                smsModel?.let { viewModel.receiveSms(it) }
             }
         }
     }
 
-
+/*
     override fun receiveSms(smsModel: SmsModel) {
         Log.d(
             "khkhkh SmsReceiver",
             "Received SMS: phoneNumber: ${smsModel.phoneNumber}, message: ${smsModel.message}"
         )
+
     }
+
+ */
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.doman.SmsReceiver
+import com.example.smscomposeapp.infrastructure.SmsBrdReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
 import com.example.smscomposeapp.ui.user_chat_screen.SmsUserChatScreenFragment
@@ -28,7 +29,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var permission: SmsPermission
     private lateinit var viewModel: SmsViewModel
     private lateinit var sharePref: AppSharePerf
-    private lateinit var smsReceiver: SmsReceiver
+    private lateinit var smsReceiver: SmsBrdReceiver
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,10 +37,10 @@ class MainActivity : FragmentActivity() {
         permission = SmsPermission(this)
         viewModel = SmsContainer.getSmsViewModel()
         sharePref = AppSharePerf(this)
-        smsReceiver = com.example.smscomposeapp.infrastructure.SmsReceiver()
+        smsReceiver = SmsBrdReceiver(viewModel)
         // Register the SmsReceiver
         registerReceiver(
-            smsReceiver as com.example.smscomposeapp.infrastructure.SmsReceiver,
+            smsReceiver ,
             IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
         )
         setContent {
@@ -66,7 +67,7 @@ class MainActivity : FragmentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Unregister the SmsReceiver to avoid memory leaks
-        unregisterReceiver(smsReceiver as com.example.smscomposeapp.infrastructure.SmsReceiver)
+        unregisterReceiver(smsReceiver as com.example.smscomposeapp.infrastructure.SmsBrdReceiver)
     }
 
 

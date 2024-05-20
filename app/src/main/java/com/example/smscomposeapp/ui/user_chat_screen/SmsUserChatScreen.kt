@@ -1,7 +1,9 @@
 package com.example.smscomposeapp.ui.user_chat_screen
 
+import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.provider.Telephony
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -31,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -42,13 +43,14 @@ import androidx.fragment.app.Fragment
 import com.example.smscomposeapp.data.models.MessageType
 import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.di.SmsContainer
-import com.example.smscomposeapp.doman.SmsReceiver
+import com.example.smscomposeapp.infrastructure.SmsBrdReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 
 
-class SmsUserChatScreenFragment : Fragment(), SmsReceiver {
+class SmsUserChatScreenFragment : Fragment() {
 
     private lateinit var viewModel: SmsViewModel
+    private lateinit var smsBrdReceiver: SmsBrdReceiver
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
@@ -57,20 +59,38 @@ class SmsUserChatScreenFragment : Fragment(), SmsReceiver {
     ): View? {
         val view = ComposeView(requireContext())
         viewModel = SmsContainer.getSmsViewModel()
+        smsBrdReceiver = SmsBrdReceiver(viewModel)
         view.setContent {
             SmsUserChatScreen(viewModel = viewModel)
         }
         return view
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        val intentFilter = IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
+        context?.registerReceiver(smsBrdReceiver, intentFilter)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        context?.unregisterReceiver(smsBrdReceiver)
+    }
+
+    /*
+        override fun receiveSms(smsModel: SmsModel) {
+
+        }
+    */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
     fun SmsUserChatScreen(viewModel: SmsViewModel) {
-        val context = LocalContext.current
         var phoneNumber by remember { mutableStateOf("") }
         var message by remember { mutableStateOf("") }
         val smsModelsState = remember { mutableStateOf(emptyList<SmsModel>()) }
-        val smsReceiver by viewModel.receivedMessages.collectAsState()
+        var messageShown = false
+        val receivedMessages by viewModel.receivedMessages.collectAsState()
 
         Scaffold(
             content = { padding ->
@@ -94,8 +114,14 @@ class SmsUserChatScreenFragment : Fragment(), SmsReceiver {
                             .padding(8.dp)
                     )
                     //TODO: show receive text
-                    Text(text = "")
 
+                    LazyColumn {
+                        items(receivedMessages) {sms ->
+                            ChatMessageItem(chat = sms)
+                        }
+                        Log.e("khkhkh", "receivedMessages: $receivedMessages")
+                    }
+                    //TODO: show send text
                     ChatList(smsModelsState = smsModelsState)
                 }
             },
@@ -167,13 +193,7 @@ class SmsUserChatScreenFragment : Fragment(), SmsReceiver {
                 .fillMaxWidth()
                 .padding(16.dp)
         )
-
     }
-
-    override fun receiveSms(smsModel: SmsModel) {
-        TODO("Not yet implemented")
-    }
-
 
 }
 
