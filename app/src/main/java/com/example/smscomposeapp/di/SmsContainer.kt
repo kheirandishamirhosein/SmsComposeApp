@@ -13,7 +13,8 @@ object SmsContainer {
     fun initialize(context: Context) {
         smsDb = SmsFactory.provideSmsUserDatabase(context.applicationContext)
         smsUserDao = smsDb.dao
-        smsViewModel = SmsFactory.provideSmsViewModel(smsUserDao)
+        val smsSender = SmsFactory.provideSmsSender()
+        smsViewModel = SmsFactory.provideSmsViewModel(smsUserDao, smsSender)
     }
 
     fun getSmsViewModel(): SmsViewModel {

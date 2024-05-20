@@ -28,7 +28,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var permission: SmsPermission
     private lateinit var viewModel: SmsViewModel
     private lateinit var sharePref: AppSharePerf
-    private lateinit var smsReceiver: SmsBrdReceiver
+    //private lateinit var smsReceiver: SmsBrdReceiver
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,12 +36,14 @@ class MainActivity : FragmentActivity() {
         permission = SmsPermission(this)
         viewModel = SmsContainer.getSmsViewModel()
         sharePref = AppSharePerf(this)
-        smsReceiver = SmsBrdReceiver(viewModel)
+        //smsReceiver = SmsBrdReceiver(viewModel)
         // Register the SmsReceiver
+        /*
         registerReceiver(
             smsReceiver ,
             IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
         )
+        */
         setContent {
             SmsComposeAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -66,7 +68,7 @@ class MainActivity : FragmentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Unregister the SmsReceiver to avoid memory leaks
-        unregisterReceiver(smsReceiver as com.example.smscomposeapp.infrastructure.SmsBrdReceiver)
+        //unregisterReceiver(smsReceiver as com.example.smscomposeapp.infrastructure.SmsBrdReceiver)
     }
 
 
@@ -91,7 +93,6 @@ class MainActivity : FragmentActivity() {
             SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //TODO: receive SMS
-
                     Log.e("khkhkh", "receive sms: ${permission.isReceiveSmsPermissionGranted()}")
                 } else {
                     permission.requestReceiveSmsPermission(SmsPermissionCode.RECEIVE_SMS_PERMISSION_CODE)

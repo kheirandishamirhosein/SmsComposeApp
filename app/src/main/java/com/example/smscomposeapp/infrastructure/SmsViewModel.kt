@@ -4,18 +4,21 @@ import androidx.lifecycle.ViewModel
 import com.example.smscomposeapp.data.dao.SmsUserDao
 import com.example.smscomposeapp.data.imp.ImpSmsSendRepository
 import com.example.smscomposeapp.data.models.SmsModel
+import com.example.smscomposeapp.doman.SmsSender
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class SmsViewModel(private val smsUserDao: SmsUserDao) : ViewModel() {
-    private val smsSender = ImpSmsSendRepository()
-    private val smsList = mutableListOf<SmsModel>()
+class SmsViewModel(private val smsUserDao: SmsUserDao , private val smsSender: SmsSender) : ViewModel() {
+    //private val smsSender = ImpSmsSendRepository()
+    //private val smsList = mutableListOf<SmsModel>()
 
-    private val _receivedMessages = MutableStateFlow<List<SmsModel>>(emptyList())
-    val receivedMessages: StateFlow<List<SmsModel>> = _receivedMessages
+    //private val _receivedMessages = MutableStateFlow<List<SmsModel>>(emptyList())
+    //val receivedMessages: StateFlow<List<SmsModel>> = _receivedMessages
 
-    val smsModels: List<SmsModel>
-        get() = smsList.toList()
+    //val smsModels: List<SmsModel>
+    //    get() = smsList.toList()
+    private val _smsModels = MutableStateFlow<List<SmsModel>>(emptyList())
+    val smsModels: StateFlow<List<SmsModel>> = _smsModels
 
     //Room DB
     /*
@@ -32,12 +35,15 @@ class SmsViewModel(private val smsUserDao: SmsUserDao) : ViewModel() {
     */
 
     fun sendSms(smsModel: SmsModel) {
-        smsList.add(smsModel)
+        //smsList.add(smsModel)
+        //smsSender.sendSms(smsModel)
+        _smsModels.value += smsModel
         smsSender.sendSms(smsModel)
     }
 
 
     fun receiveSms(smsModel: SmsModel) {
-        _receivedMessages.value += smsModel
+        //_receivedMessages.value += smsModel
+        _smsModels.value += smsModel
     }
 }

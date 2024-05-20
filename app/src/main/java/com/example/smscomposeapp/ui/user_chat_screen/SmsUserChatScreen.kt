@@ -25,7 +25,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,7 +65,6 @@ class SmsUserChatScreenFragment : Fragment() {
         return view
     }
 
-
     override fun onResume() {
         super.onResume()
         val intentFilter = IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
@@ -78,15 +76,12 @@ class SmsUserChatScreenFragment : Fragment() {
         context?.unregisterReceiver(smsBrdReceiver)
     }
 
-
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
     fun SmsUserChatScreen(viewModel: SmsViewModel) {
         var phoneNumber by remember { mutableStateOf("") }
         var message by remember { mutableStateOf("") }
-        val smsModelsState = remember { mutableStateOf(emptyList<SmsModel>()) }
-        val receivedMessages by viewModel.receivedMessages.collectAsState()
+        val smsModel by viewModel.smsModels.collectAsState()
 
         Scaffold(
             content = { padding ->
@@ -109,16 +104,13 @@ class SmsUserChatScreenFragment : Fragment() {
                             .fillMaxWidth()
                             .padding(8.dp)
                     )
-                    //TODO: show receive text
 
                     LazyColumn {
-                        items(receivedMessages) {sms ->
+                        items(smsModel) { sms ->
                             ChatMessageItem(chat = sms)
                         }
-                        Log.e("khkhkh", "receivedMessages: $receivedMessages")
+                        Log.e("khkhkh", "smsModel: $smsModel")
                     }
-                    //TODO: show send text
-                    ChatList(smsModelsState = smsModelsState)
                 }
             },
             bottomBar = {
@@ -147,7 +139,6 @@ class SmsUserChatScreenFragment : Fragment() {
                                 )
                             )
                             message = ""
-                            smsModelsState.value = viewModel.smsModels
                         }
                     ) {
                         Icon(
@@ -165,16 +156,6 @@ class SmsUserChatScreenFragment : Fragment() {
     private fun String.isRTL(): Boolean {
         return Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
                 Character.getDirectionality(this[0]) == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC
-    }
-
-
-    @Composable
-    fun ChatList(smsModelsState: MutableState<List<SmsModel>>) {
-        LazyColumn {
-            items(smsModelsState.value) { chat ->
-                ChatMessageItem(chat = chat)
-            }
-        }
     }
 
     @Composable
