@@ -9,11 +9,15 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SmsUserDao {
 
-    /*
+
     @Upsert
     suspend fun upsertSmsUserModel(smsModel: SmsModel)
 
     @Query("SELECT * FROM smsmodel")
     fun getAllSmsRecord(): Flow<List<SmsModel>>
-    */
+
+    //TODO: Add for Message
+    @Query("SELECT * FROM SmsModel ORDER BY id ASC")
+    fun getAllSmsMessages(): Flow<List<SmsModel>>
+
 }

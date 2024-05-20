@@ -2,11 +2,9 @@ package com.example.smscomposeapp.util
 
 import android.Manifest
 import android.content.pm.PackageManager
-import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.example.smscomposeapp.main.MainActivity
 
 class SmsPermission(private val context: FragmentActivity) {
 
@@ -17,7 +15,7 @@ class SmsPermission(private val context: FragmentActivity) {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                context as FragmentActivity,
+                context,
                 arrayOf(Manifest.permission.RECEIVE_SMS),
                 requestCode
             )
@@ -31,7 +29,7 @@ class SmsPermission(private val context: FragmentActivity) {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                context as FragmentActivity,
+                context,
                 arrayOf(Manifest.permission.SEND_SMS),
                 requestCode
             )

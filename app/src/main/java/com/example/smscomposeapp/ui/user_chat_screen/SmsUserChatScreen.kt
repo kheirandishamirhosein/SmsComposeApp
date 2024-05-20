@@ -106,7 +106,7 @@ class SmsUserChatScreenFragment : Fragment() {
                     )
 
                     LazyColumn {
-                        items(smsModel) { sms ->
+                        items(viewModel.smsModels.value) { sms ->
                             ChatMessageItem(chat = sms)
                         }
                         Log.e("khkhkh", "smsModel: $smsModel")
