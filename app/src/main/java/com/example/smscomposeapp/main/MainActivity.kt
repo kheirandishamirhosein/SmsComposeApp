@@ -14,7 +14,7 @@ import androidx.fragment.app.FragmentActivity
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
-import com.example.smscomposeapp.ui.user_chat_screen.SmsUserChatScreenFragment
+import com.example.smscomposeapp.ui.user_list_screen.UserListScreenFragment
 import com.example.smscomposeapp.util.AppSharePerf
 import com.example.smscomposeapp.util.SmsPermission
 import com.example.smscomposeapp.util.SmsPermissionCode
@@ -44,10 +44,18 @@ class MainActivity : FragmentActivity() {
                     //SmsPermission()
                     //SmsScreen()
                     //SmsUserChatScreen(viewModel)
+                    /*
                     val fragment = SmsUserChatScreenFragment()
                     supportFragmentManager.beginTransaction()
                         .replace(android.R.id.content, fragment)
                         .commit()
+
+                     */
+                    val fragment = UserListScreenFragment()
+                    supportFragmentManager.beginTransaction()
+                        .replace(android.R.id.content, fragment)
+                        .commit()
+
 
                 }
             }

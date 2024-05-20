@@ -9,15 +9,32 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class SmsViewModel(private val smsUserDao: SmsUserDao, private val smsSender: SmsSender) :
-    ViewModel() {
+class SmsViewModel(
+    private val smsUserDao: SmsUserDao,
+    private val smsSender: SmsSender
+) : ViewModel() {
+
     private val _smsModels = MutableStateFlow<List<SmsModel>>(emptyList())
     val smsModels: StateFlow<List<SmsModel>> = _smsModels
 
+    private val _lastSmsUser = MutableStateFlow<List<SmsModel>>(emptyList())
+    val lastSmsUser: StateFlow<List<SmsModel>> = _lastSmsUser
+
+
     init {
         fetchSmsFromDatabase()
+        fetchGetLastSmsUser()
     }
 
+    private fun fetchGetLastSmsUser() {
+        viewModelScope.launch {
+            smsUserDao.getLastSmsMessage().collect { smsList ->
+                _lastSmsUser.value = smsList
+            }
+        }
+    }
+
+    // For save messages chat screen in database
     private fun fetchSmsFromDatabase() {
         viewModelScope.launch {
             smsUserDao.getAllSmsMessages().collect { smsList ->
@@ -26,6 +43,7 @@ class SmsViewModel(private val smsUserDao: SmsUserDao, private val smsSender: Sm
         }
     }
 
+    // For send messages
     fun sendSms(smsModel: SmsModel) {
         viewModelScope.launch {
             smsUserDao.upsertSmsUserModel(smsModel)
@@ -35,6 +53,7 @@ class SmsViewModel(private val smsUserDao: SmsUserDao, private val smsSender: Sm
 
     }
 
+    // For receive messages
     fun receiveSms(smsModel: SmsModel) {
         viewModelScope.launch {
             smsUserDao.upsertSmsUserModel(smsModel)
