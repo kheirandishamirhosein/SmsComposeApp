@@ -14,7 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import com.example.smscomposeapp.di.SmsContainer
-import com.example.smscomposeapp.doman.SmsReceiver
 import com.example.smscomposeapp.infrastructure.SmsBrdReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme

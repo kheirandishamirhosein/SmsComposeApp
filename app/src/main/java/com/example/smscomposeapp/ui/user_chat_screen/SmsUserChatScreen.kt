@@ -78,18 +78,14 @@ class SmsUserChatScreenFragment : Fragment() {
         context?.unregisterReceiver(smsBrdReceiver)
     }
 
-    /*
-        override fun receiveSms(smsModel: SmsModel) {
 
-        }
-    */
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
     fun SmsUserChatScreen(viewModel: SmsViewModel) {
         var phoneNumber by remember { mutableStateOf("") }
         var message by remember { mutableStateOf("") }
         val smsModelsState = remember { mutableStateOf(emptyList<SmsModel>()) }
-        var messageShown = false
         val receivedMessages by viewModel.receivedMessages.collectAsState()
 
         Scaffold(
@@ -126,7 +122,7 @@ class SmsUserChatScreenFragment : Fragment() {
                 }
             },
             bottomBar = {
-                BottomAppBar() {
+                BottomAppBar {
                     OutlinedTextField(
                         value = message,
                         onValueChange = { message = it },
@@ -150,7 +146,6 @@ class SmsUserChatScreenFragment : Fragment() {
                                     messageType = MessageType.SENT
                                 )
                             )
-                            //viewModel.receiveSms(SmsModel(phoneNumber = "من", message = message))
                             message = ""
                             smsModelsState.value = viewModel.smsModels
                         }
