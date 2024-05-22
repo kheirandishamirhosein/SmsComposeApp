@@ -6,21 +6,26 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.fragment.app.FragmentActivity
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
-import com.example.smscomposeapp.ui.user_list_screen.UserListScreenFragment
+import com.example.smscomposeapp.ui.user_chat_screen.SmsUserChatScreen
+import com.example.smscomposeapp.ui.user_list_screen.UserListScreen
 import com.example.smscomposeapp.util.AppSharePerf
 import com.example.smscomposeapp.util.SmsPermission
 import com.example.smscomposeapp.util.SmsPermissionCode
 
 
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var permission: SmsPermission
     private lateinit var viewModel: SmsViewModel
@@ -41,22 +46,7 @@ class MainActivity : FragmentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     sendMessageIfPermissionsGranted()
-                    //SmsPermission()
-                    //SmsScreen()
-                    //SmsUserChatScreen(viewModel)
-                    /*
-                    val fragment = SmsUserChatScreenFragment()
-                    supportFragmentManager.beginTransaction()
-                        .replace(android.R.id.content, fragment)
-                        .commit()
-
-                     */
-                    val fragment = UserListScreenFragment()
-                    supportFragmentManager.beginTransaction()
-                        .replace(android.R.id.content, fragment)
-                        .commit()
-
-
+                    NavControllerManagementApp()
                 }
             }
         }
@@ -103,15 +93,21 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-}
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @Composable
+    fun NavControllerManagementApp() {
+        val navController = rememberNavController()
 
-/*
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SmsComposeAppTheme {
-        //SmsScreen()
+        NavHost(
+            navController = navController,
+            startDestination = "userListScreen"
+        ) {
+            composable("userListScreen") {
+                UserListScreen(navController = navController, viewModel = viewModel)
+            }
+            composable("smsUserChatScreen") {
+                SmsUserChatScreen(navController = navController, viewModel = viewModel)
+            }
+        }
     }
 }
-
- */
