@@ -24,7 +24,6 @@ import com.example.smscomposeapp.util.AppSharePerf
 import com.example.smscomposeapp.util.SmsPermission
 import com.example.smscomposeapp.util.SmsPermissionCode
 
-
 class MainActivity : AppCompatActivity() {
 
     private lateinit var permission: SmsPermission

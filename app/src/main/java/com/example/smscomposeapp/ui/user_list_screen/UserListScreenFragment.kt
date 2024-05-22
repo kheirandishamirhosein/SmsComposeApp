@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -103,7 +105,8 @@ fun UserItem(smsModel: SmsModel) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .background(Color.Cyan)
+            .border(BorderStroke(1.dp, Color.Gray), shape = RoundedCornerShape(8.dp))
+            .background(Color.Transparent)
             .padding(8.dp)
             .clip(RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically
