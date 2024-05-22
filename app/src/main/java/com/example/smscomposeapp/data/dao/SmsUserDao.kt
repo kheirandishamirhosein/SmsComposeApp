@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SmsUserDao {
 
-
     @Upsert
     suspend fun upsertSmsUserModel(smsModel: SmsModel)
 
@@ -20,11 +19,24 @@ interface SmsUserDao {
     @Query("SELECT * FROM SmsModel ORDER BY id ASC")
     fun getAllSmsMessages(): Flow<List<SmsModel>>
 
-    @Query(
+    /*
+        @Query(
         "SELECT * FROM SmsModel " +
                 "WHERE phoneNumber IN " +
                 "(SELECT phoneNumber From SmsModel GROUP BY phoneNumber ) " +
                 "ORDER BY id DESC"
+    )
+     */
+    @Query(
+        """
+    SELECT * FROM SmsModel 
+    WHERE id IN (
+        SELECT MAX(id) 
+        FROM SmsModel 
+        GROUP BY phoneNumber
+    ) 
+    ORDER BY id DESC
+"""
     )
     fun getLastSmsMessage(): Flow<List<SmsModel>>
 
