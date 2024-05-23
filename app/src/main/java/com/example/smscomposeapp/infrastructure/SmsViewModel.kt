@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.smscomposeapp.data.dao.SmsUserDao
 import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.doman.SmsSender
+import com.example.smscomposeapp.util.StandardizePhoneNumber
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SmsViewModel(
@@ -22,8 +24,23 @@ class SmsViewModel(
 
 
     init {
+        standardizeAllPhoneNumbers(smsUserDao)
         fetchSmsFromDatabase()
         fetchGetLastSmsUser()
+    }
+
+    private fun standardizeAllPhoneNumbers(smsUserDao: SmsUserDao) {
+        viewModelScope.launch {
+            val allSms = smsUserDao.getAllSmsMessages().first()
+            allSms.forEach { smsModel ->
+                val standardizedPhoneNumber =
+                    StandardizePhoneNumber.standardizePhoneNumber(phoneNumber = smsModel.phoneNumber)
+                if (standardizedPhoneNumber != smsModel.phoneNumber) {
+                    val updateSmsModel = smsModel.copy(phoneNumber = standardizedPhoneNumber)
+                    smsUserDao.upsertSmsUserModel(updateSmsModel)
+                }
+            }
+        }
     }
 
     private fun fetchGetLastSmsUser() {
@@ -43,6 +60,7 @@ class SmsViewModel(
         }
     }
 
+    /*
     // For send messages
     fun sendSms(smsModel: SmsModel) {
         viewModelScope.launch {
@@ -61,5 +79,32 @@ class SmsViewModel(
         }
 
     }
+
+    */
+
+
+    // For send messages
+    fun sendSms(smsModel: SmsModel) {
+        viewModelScope.launch {
+            val standardizedSmsModel = smsModel.copy(
+                phoneNumber = StandardizePhoneNumber.standardizePhoneNumber(smsModel.phoneNumber)
+            )
+            smsUserDao.upsertSmsUserModel(standardizedSmsModel)
+            _smsModels.value += standardizedSmsModel
+            smsSender.sendSms(standardizedSmsModel)
+        }
+    }
+
+    // For receive messages
+    fun receiveSms(smsModel: SmsModel) {
+        viewModelScope.launch {
+            val standardizedSmsModel = smsModel.copy(
+                phoneNumber = StandardizePhoneNumber.standardizePhoneNumber(smsModel.phoneNumber)
+            )
+            smsUserDao.upsertSmsUserModel(standardizedSmsModel)
+            _smsModels.value += standardizedSmsModel
+        }
+    }
+
 
 }
