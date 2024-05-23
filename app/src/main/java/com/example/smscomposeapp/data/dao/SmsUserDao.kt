@@ -40,4 +40,8 @@ interface SmsUserDao {
     )
     fun getLastSmsMessage(): Flow<List<SmsModel>>
 
+    //get messages by phone number
+    @Query("SELECT * FROM SmsModel WHERE phoneNumber = :phoneNumber ORDER BY id ASC")
+    fun getSmsByPhoneNumber(phoneNumber: String): Flow<List<SmsModel>>
+
 }

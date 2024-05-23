@@ -12,9 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 import com.example.smscomposeapp.ui.theme.SmsComposeAppTheme
@@ -104,8 +106,19 @@ class MainActivity : AppCompatActivity() {
             composable("userListScreen") {
                 UserListScreen(navController = navController, viewModel = viewModel)
             }
-            composable("smsUserChatScreen") {
-                SmsUserChatScreen(navController = navController, viewModel = viewModel)
+            composable(
+                "smsUserChatScreen/{phoneNumber}",
+                arguments = listOf(navArgument("phoneNumber") { type = NavType.StringType })
+            ) {
+                val phoneNumber = it.arguments?.getString("phoneNumber")
+                if (phoneNumber != null) {
+                    SmsUserChatScreen(
+                        navController = navController,
+                        viewModel = viewModel,
+                        phoneNumber = phoneNumber
+                    )
+                }
+
             }
         }
     }

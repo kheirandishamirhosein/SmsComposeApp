@@ -8,6 +8,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -93,14 +94,14 @@ fun UserListScreen(navController: NavController, viewModel: SmsViewModel) {
             modifier = Modifier.padding(8.dp)
         ) {
             items(lastSmsUser) { sms ->
-                UserItem(smsModel = sms)
+                UserItem(navController = navController, smsModel = sms)
             }
         }
     }
 }
 
 @Composable
-fun UserItem(smsModel: SmsModel) {
+fun UserItem(navController: NavController, smsModel: SmsModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -108,7 +109,10 @@ fun UserItem(smsModel: SmsModel) {
             .border(BorderStroke(1.dp, Color.Gray), shape = RoundedCornerShape(8.dp))
             .background(Color.Transparent)
             .padding(8.dp)
-            .clip(RoundedCornerShape(8.dp)),
+            .clip(RoundedCornerShape(8.dp))
+            .clickable {
+                navController.navigate("smsUserChatScreen/${smsModel.phoneNumber}")
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(

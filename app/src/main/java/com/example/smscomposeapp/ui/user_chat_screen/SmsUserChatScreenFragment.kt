@@ -51,6 +51,7 @@ class SmsUserChatScreenFragment(private val navController: NavController) : Frag
 
     private lateinit var viewModel: SmsViewModel
     private lateinit var smsBrdReceiver: SmsBrdReceiver
+    private var phoneNumber: String? = null
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
@@ -61,7 +62,14 @@ class SmsUserChatScreenFragment(private val navController: NavController) : Frag
         viewModel = SmsContainer.getSmsViewModel()
         smsBrdReceiver = SmsBrdReceiver(viewModel)
         view.setContent {
-            SmsUserChatScreen(navController = navController, viewModel = viewModel)
+            if (phoneNumber != null) {
+                SmsUserChatScreen(
+                    navController = navController,
+                    viewModel = viewModel,
+                    phoneNumber = phoneNumber!!
+                )
+            }
+
         }
         return view
     }
@@ -81,10 +89,11 @@ class SmsUserChatScreenFragment(private val navController: NavController) : Frag
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel) {
-    var phoneNumber by remember { mutableStateOf("") }
+fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, phoneNumber: String) {
+    //var phoneNumber by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     val smsModel by viewModel.smsModels.collectAsState()
+    val filterMessages = smsModel.filter { it.phoneNumber == phoneNumber }
 
     Scaffold(
         content = { padding ->
@@ -93,13 +102,11 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel) {
                     .fillMaxSize()
                     .padding(padding)
             ) {
+
                 OutlinedTextField(
                     value = phoneNumber,
-                    onValueChange = { value ->
-                        if (value.length <= 11) {
-                            phoneNumber = value
-                        }
-                    },
+                    onValueChange = { /* No-op */ },
+                    readOnly = true,
                     label = { Text(text = "phone number") },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
                     visualTransformation = VisualTransformation.None,
@@ -109,7 +116,7 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel) {
                 )
 
                 LazyColumn {
-                    items(viewModel.smsModels.value) { sms ->
+                    items(filterMessages) { sms ->
                         ChatMessageItem(chat = sms)
                     }
                     Log.e("khkhkh", "smsModel: $smsModel")

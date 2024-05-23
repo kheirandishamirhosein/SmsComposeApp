@@ -22,6 +22,8 @@ class SmsViewModel(
     private val _lastSmsUser = MutableStateFlow<List<SmsModel>>(emptyList())
     val lastSmsUser: StateFlow<List<SmsModel>> = _lastSmsUser
 
+    private val _selectedUserSmsModels = MutableStateFlow<List<SmsModel>>(emptyList())
+    val selectedUserSmsModels: StateFlow<List<SmsModel>> = _selectedUserSmsModels
 
     init {
         standardizeAllPhoneNumbers(smsUserDao)
@@ -56,6 +58,14 @@ class SmsViewModel(
         viewModelScope.launch {
             smsUserDao.getAllSmsMessages().collect { smsList ->
                 _smsModels.value = smsList
+            }
+        }
+    }
+
+    fun fetchSmsByPhoneNumber(phoneNumber: String) {
+        viewModelScope.launch {
+            smsUserDao.getSmsByPhoneNumber(phoneNumber).collect { smsList ->
+                _selectedUserSmsModels.value = smsList
             }
         }
     }
