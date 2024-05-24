@@ -79,7 +79,7 @@ fun UserListScreen(navController: NavController, viewModel: SmsViewModel) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate("smsUserChatScreen")
+                    navController.navigate("newChatScreen")
                 },
                 content = {
                     Icon(Icons.Default.Email, contentDescription = "Send SMS")

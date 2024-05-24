@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
+import android.util.Log
 import com.example.smscomposeapp.data.models.MessageType
 import com.example.smscomposeapp.data.models.SmsModel
 
@@ -26,6 +27,7 @@ class SmsBrdReceiver(private val viewModel: SmsViewModel) : BroadcastReceiver() 
                         )
                     }
                 smsModel?.let { viewModel.receiveSms(it) }
+                Log.d("khkhkh SmsReceiver", "Received SMS: phoneNumber: $phoneNumber, message: $messageText")
             }
         }
     }

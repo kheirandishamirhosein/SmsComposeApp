@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -47,11 +49,14 @@ import com.example.smscomposeapp.infrastructure.SmsBrdReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
 
 
-class SmsUserChatScreenFragment(private val navController: NavController) : Fragment() {
+class SmsUserChatScreenFragment(
+    private val navController: NavController,
+    private val phoneNumber: String?
+) : Fragment() {
 
     private lateinit var viewModel: SmsViewModel
     private lateinit var smsBrdReceiver: SmsBrdReceiver
-    private var phoneNumber: String? = null
+
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
@@ -62,14 +67,11 @@ class SmsUserChatScreenFragment(private val navController: NavController) : Frag
         viewModel = SmsContainer.getSmsViewModel()
         smsBrdReceiver = SmsBrdReceiver(viewModel)
         view.setContent {
-            if (phoneNumber != null) {
-                SmsUserChatScreen(
-                    navController = navController,
-                    viewModel = viewModel,
-                    phoneNumber = phoneNumber!!
-                )
-            }
-
+            SmsUserChatScreen(
+                navController = navController,
+                viewModel = viewModel,
+                phoneNumber = phoneNumber!!
+            )
         }
         return view
     }
@@ -89,11 +91,25 @@ class SmsUserChatScreenFragment(private val navController: NavController) : Frag
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, phoneNumber: String) {
-    //var phoneNumber by remember { mutableStateOf("") }
+fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, phoneNumber: String?) {
+    var phoneNumberState by remember { mutableStateOf(phoneNumber ?: "") }
     var message by remember { mutableStateOf("") }
     val smsModel by viewModel.smsModels.collectAsState()
-    val filterMessages = smsModel.filter { it.phoneNumber == phoneNumber }
+    val context = LocalContext.current
+    val filterMessages = if (phoneNumberState.isNotEmpty()) {
+        smsModel.filter { it.phoneNumber == phoneNumberState }
+    } else {
+        emptyList()
+    }
+    //Registration and cancellation of registration BroadcastReceiver
+    DisposableEffect(Unit) {
+        val smsBrdReceiver = SmsBrdReceiver(viewModel)
+        val intentFilter = IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
+        context.registerReceiver(smsBrdReceiver, intentFilter)
+        onDispose {
+            context.unregisterReceiver(smsBrdReceiver)
+        }
+    }
 
     Scaffold(
         content = { padding ->
@@ -104,9 +120,9 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, pho
             ) {
 
                 OutlinedTextField(
-                    value = phoneNumber,
-                    onValueChange = { /* No-op */ },
-                    readOnly = true,
+                    value = phoneNumberState,
+                    onValueChange = { phoneNumberState = it },
+                    readOnly = phoneNumber != null,
                     label = { Text(text = "phone number") },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
                     visualTransformation = VisualTransformation.None,
@@ -119,7 +135,7 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, pho
                     items(filterMessages) { sms ->
                         ChatMessageItem(chat = sms)
                     }
-                    Log.e("khkhkh", "smsModel: $smsModel")
+                    Log.e("khkhkh", "smsModel: $filterMessages")
                 }
             }
         },
@@ -141,14 +157,25 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, pho
                 )
                 IconButton(
                     onClick = {
-                        viewModel.sendSms(
-                            SmsModel(
-                                phoneNumber = phoneNumber,
-                                message = message,
-                                messageType = MessageType.SENT
+                        if (phoneNumberState.isNotEmpty()) {
+                            viewModel.sendSms(
+                                SmsModel(
+                                    phoneNumber = phoneNumberState,
+                                    message = message,
+                                    messageType = MessageType.SENT
+                                )
                             )
-                        )
-                        message = ""
+                            message = ""
+                        } else {
+                            viewModel.sendSms(
+                                SmsModel(
+                                    phoneNumber = phoneNumberState,
+                                    message = message,
+                                    messageType = MessageType.SENT
+                                )
+                            )
+                            message = ""
+                        }
                     }
                 ) {
                     Icon(

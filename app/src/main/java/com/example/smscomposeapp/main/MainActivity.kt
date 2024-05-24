@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
             composable("userListScreen") {
                 UserListScreen(navController = navController, viewModel = viewModel)
             }
+
             composable(
                 "smsUserChatScreen/{phoneNumber}",
                 arguments = listOf(navArgument("phoneNumber") { type = NavType.StringType })
@@ -118,7 +119,14 @@ class MainActivity : AppCompatActivity() {
                         phoneNumber = phoneNumber
                     )
                 }
+            }
 
+            composable("newChatScreen") {
+                SmsUserChatScreen(
+                    navController = navController,
+                    viewModel = viewModel,
+                    phoneNumber = null
+                )
             }
         }
     }
