@@ -18,16 +18,21 @@ class SmsBrdReceiver(private val viewModel: SmsViewModel) : BroadcastReceiver() 
                 val smsMessage = SmsMessage.createFromPdu(pdu as ByteArray)
                 val phoneNumber = smsMessage.originatingAddress
                 val messageText = smsMessage.messageBody
+                val currentTimeMillis = System.currentTimeMillis()
                 val smsModel =
                     phoneNumber?.let {
                         SmsModel(
                             phoneNumber = it,
                             message = messageText,
+                            timestamp = currentTimeMillis,
                             messageType = MessageType.RECEIVED
                         )
                     }
                 smsModel?.let { viewModel.receiveSms(it) }
-                Log.d("khkhkh SmsReceiver", "Received SMS: phoneNumber: $phoneNumber, message: $messageText")
+                Log.d(
+                    "khkhkh SmsReceiver",
+                    "Received SMS: phoneNumber: $phoneNumber, message: $messageText"
+                )
             }
         }
     }

@@ -9,5 +9,6 @@ data class SmsModel(
     val id: Int = 0,
     val phoneNumber: String,
     val message: String,
+    val timestamp: Long,
     val messageType: MessageType
 )

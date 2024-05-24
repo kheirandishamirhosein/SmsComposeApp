@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.smscomposeapp.data.dao.SmsUserDao
 import com.example.smscomposeapp.data.db.SmsUserDatabase
+import com.example.smscomposeapp.data.db.SmsUserDatabase.Companion.MIGRATION_1_2
 import com.example.smscomposeapp.data.imp.ImpSmsSendRepository
 import com.example.smscomposeapp.doman.SmsSender
 import com.example.smscomposeapp.infrastructure.SmsViewModel
@@ -15,7 +16,9 @@ object SmsFactory {
             context = context.applicationContext,
             klass = SmsUserDatabase::class.java,
             name = "smsmodel.db"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     fun provideSmsSender(): SmsSender {

@@ -11,6 +11,7 @@ class SmsApp : Application() {
     override fun onCreate() {
         super.onCreate()
         sharePerf = AppSharePerf(this)
+
         SmsContainer.initialize(applicationContext)
     }
 

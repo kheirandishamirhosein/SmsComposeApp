@@ -10,8 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -47,6 +50,7 @@ import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.di.SmsContainer
 import com.example.smscomposeapp.infrastructure.SmsBrdReceiver
 import com.example.smscomposeapp.infrastructure.SmsViewModel
+import com.example.smscomposeapp.util.FormatTimestamp
 
 
 class SmsUserChatScreenFragment(
@@ -101,6 +105,7 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, pho
     } else {
         emptyList()
     }
+    val currentTimeMillis = System.currentTimeMillis()
     //Registration and cancellation of registration BroadcastReceiver
     DisposableEffect(Unit) {
         val smsBrdReceiver = SmsBrdReceiver(viewModel)
@@ -162,6 +167,7 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, pho
                                 SmsModel(
                                     phoneNumber = phoneNumberState,
                                     message = message,
+                                    timestamp = currentTimeMillis,
                                     messageType = MessageType.SENT
                                 )
                             )
@@ -171,6 +177,7 @@ fun SmsUserChatScreen(navController: NavController, viewModel: SmsViewModel, pho
                                 SmsModel(
                                     phoneNumber = phoneNumberState,
                                     message = message,
+                                    timestamp = currentTimeMillis,
                                     messageType = MessageType.SENT
                                 )
                             )
@@ -206,6 +213,16 @@ fun ChatMessageItem(chat: SmsModel) {
             .fillMaxWidth()
             .padding(16.dp)
     )
+    Spacer(modifier = Modifier.height(1.dp))
+    Text(
+        text = FormatTimestamp.formatTimestamp(chat.timestamp),
+        style = TextStyle(fontSize = 10.sp, color = Color.Gray),
+        textAlign = textAlign,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 16.dp, start = 16.dp)
+    )
+
 }
 
 

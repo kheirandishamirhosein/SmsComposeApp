@@ -64,14 +64,6 @@ class SmsViewModel(
         }
     }
 
-    fun fetchSmsByPhoneNumber(phoneNumber: String) {
-        viewModelScope.launch {
-            smsUserDao.getSmsByPhoneNumber(phoneNumber).collect { smsList ->
-                _selectedUserSmsModels.value = smsList
-            }
-        }
-    }
-
     // For send messages
     fun sendSms(smsModel: SmsModel) {
         viewModelScope.launch {
