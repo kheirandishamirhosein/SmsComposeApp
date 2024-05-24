@@ -9,7 +9,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
@@ -25,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -205,14 +211,27 @@ private fun String.isRTL(): Boolean {
 @Composable
 fun ChatMessageItem(chat: SmsModel) {
     val textAlign = if (chat.messageType == MessageType.SENT) TextAlign.End else TextAlign.Start
-    Text(
-        text = chat.message,
-        style = TextStyle(fontSize = 16.sp),
-        textAlign = textAlign,
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-    )
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = if (chat.messageType == MessageType.SENT) Arrangement.End else Arrangement.Start
+    ) {
+        Surface(
+            modifier = Modifier
+                .padding(2.dp)
+                .border(BorderStroke(1.dp, Color.Gray), shape = RoundedCornerShape(8.dp)),
+            shape = RoundedCornerShape(8.dp),
+            color = Color.Unspecified,
+        ) {
+            Text(
+                text = chat.message,
+                style = TextStyle(fontSize = 16.sp),
+                textAlign = textAlign,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
     Spacer(modifier = Modifier.height(1.dp))
     Text(
         text = FormatTimestamp.formatTimestamp(chat.timestamp),
@@ -220,7 +239,7 @@ fun ChatMessageItem(chat: SmsModel) {
         textAlign = textAlign,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 16.dp, start = 16.dp)
+            .padding(end = 18.dp, start = 18.dp, bottom = 16.dp)
     )
 
 }

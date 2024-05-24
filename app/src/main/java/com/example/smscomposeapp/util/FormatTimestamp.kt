@@ -7,7 +7,7 @@ import java.util.Locale
 object FormatTimestamp {
 
     fun formatTimestamp(timestamp: Long): String {
-        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val sdf = SimpleDateFormat("HH:mm a", Locale.getDefault())
         return sdf.format(Date(timestamp))
     }
 
