@@ -32,14 +32,4 @@ class SmsBrdReceiver(private val viewModel: SmsViewModel) : BroadcastReceiver() 
         }
     }
 
-/*
-    override fun receiveSms(smsModel: SmsModel) {
-        Log.d(
-            "khkhkh SmsReceiver",
-            "Received SMS: phoneNumber: ${smsModel.phoneNumber}, message: ${smsModel.message}"
-        )
-
-    }
-
- */
 }

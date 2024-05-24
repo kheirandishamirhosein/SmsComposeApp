@@ -19,14 +19,6 @@ interface SmsUserDao {
     @Query("SELECT * FROM SmsModel ORDER BY id ASC")
     fun getAllSmsMessages(): Flow<List<SmsModel>>
 
-    /*
-        @Query(
-        "SELECT * FROM SmsModel " +
-                "WHERE phoneNumber IN " +
-                "(SELECT phoneNumber From SmsModel GROUP BY phoneNumber ) " +
-                "ORDER BY id DESC"
-    )
-     */
     @Query(
         """
     SELECT * FROM SmsModel 
@@ -43,5 +35,9 @@ interface SmsUserDao {
     //get messages by phone number
     @Query("SELECT * FROM SmsModel WHERE phoneNumber = :phoneNumber ORDER BY id ASC")
     fun getSmsByPhoneNumber(phoneNumber: String): Flow<List<SmsModel>>
+
+    //TODO: DELETE Phone number for Test
+    @Query("DELETE FROM SmsModel WHERE phoneNumber = :phoneNumber")
+    suspend fun deleteSmsByAmirPhoneNumber(phoneNumber: String)
 
 }

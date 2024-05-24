@@ -29,6 +29,8 @@ class SmsViewModel(
         standardizeAllPhoneNumbers(smsUserDao)
         fetchSmsFromDatabase()
         fetchGetLastSmsUser()
+        //TODO: Test Delete
+        //fetchDeleteAmirPhoneNumber()
     }
 
     private fun standardizeAllPhoneNumbers(smsUserDao: SmsUserDao) {
@@ -70,29 +72,6 @@ class SmsViewModel(
         }
     }
 
-    /*
-    // For send messages
-    fun sendSms(smsModel: SmsModel) {
-        viewModelScope.launch {
-            smsUserDao.upsertSmsUserModel(smsModel)
-            _smsModels.value += smsModel
-            smsSender.sendSms(smsModel)
-        }
-
-    }
-
-    // For receive messages
-    fun receiveSms(smsModel: SmsModel) {
-        viewModelScope.launch {
-            smsUserDao.upsertSmsUserModel(smsModel)
-            _smsModels.value += smsModel
-        }
-
-    }
-
-    */
-
-
     // For send messages
     fun sendSms(smsModel: SmsModel) {
         viewModelScope.launch {
@@ -116,5 +95,11 @@ class SmsViewModel(
         }
     }
 
+    //TODO: DELETE Phone number for Test
+    private fun fetchDeleteAmirPhoneNumber() {
+        viewModelScope.launch {
+            smsUserDao.deleteSmsByAmirPhoneNumber("09365911325")
+        }
+    }
 
 }
