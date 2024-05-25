@@ -36,6 +36,11 @@ interface SmsUserDao {
     @Query("SELECT * FROM SmsModel WHERE phoneNumber = :phoneNumber ORDER BY id ASC")
     fun getSmsByPhoneNumber(phoneNumber: String): Flow<List<SmsModel>>
 
+    //Delete SMS
+    @Query("DELETE FROM SmsModel WHERE id = :id")
+    fun deleteSmsById(id: Int)
+
+    /*** Test ***/
     //TODO: DELETE Phone number for Test
     @Query("DELETE FROM SmsModel WHERE phoneNumber = :phoneNumber")
     suspend fun deleteSmsByAmirPhoneNumber(phoneNumber: String)

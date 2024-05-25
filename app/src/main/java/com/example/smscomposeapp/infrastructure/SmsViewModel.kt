@@ -6,6 +6,7 @@ import com.example.smscomposeapp.data.dao.SmsUserDao
 import com.example.smscomposeapp.data.models.SmsModel
 import com.example.smscomposeapp.doman.SmsSender
 import com.example.smscomposeapp.util.StandardizePhoneNumber
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -84,6 +85,13 @@ class SmsViewModel(
             )
             smsUserDao.upsertSmsUserModel(standardizedSmsModel)
             _smsModels.value += standardizedSmsModel
+        }
+    }
+
+    // For delete messages
+    fun deleteSmsChat(smsModel: SmsModel) {
+        viewModelScope.launch(Dispatchers.IO) {
+            smsUserDao.deleteSmsById(smsModel.id)
         }
     }
 
